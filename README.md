@@ -1,3 +1,4 @@
+
 socket-io: A socket.io Polymer component
 ========================================
 
@@ -23,6 +24,5 @@ You need a functioning socket.io server running
 * 0.1.0 Initial release
 
 
-Licence
-=======
+## Licence
 MIT
