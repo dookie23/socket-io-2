@@ -25,7 +25,7 @@ You can find a fleshed out example (small chat app) that needs to be run from a 
 
 TODO: should we expose some event so parsing the "inMessage" is optional (for more complex cases)?
 -->
-<polymer-element name="socket-io" attributes="socketUrl namespace autoConnect listenTo connected outEventName inMessage outMessage">
+<polymer-element name="socket-io" attributes="socketUrl namespace rooms autoConnect listenTo connected outEventName inMessage outMessage">
   <script>
     Polymer("socket-io", {
       /**
@@ -45,6 +45,14 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
        */
       namespace:"/",
       /**
+       * room to use (see socket.io docs)
+       * defaults to 'no room'
+       * 
+       * @attribute namespace
+       * @type string
+       */
+      rooms: [],
+      /**
        * 'autoConnect` toggles the automatic connection after initialization
        * 
        * @attribute autoConnect
@@ -56,6 +64,7 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
        * @attribute connected
        * @type bool
        */
+
        
       publish: {
         get connected(){return this._connected;}
@@ -220,12 +229,14 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
       },
       //event handlers
       onConnect:function(event){
-        console.log("polymer-socket-io connected")
+        console.log("polymer-socket-io connected");
+        for (var i=0;i<this.rooms; i++) this.join(this.rooms[i]);
         this._connected = true;
         this.fire('s-io-connected');
       },
       onDisconnect:function(event){
-        console.log("polymer-socket-io disconnected")
+        console.log("polymer-socket-io disconnected");
+        for (var i=0;i<this.rooms; i++) this.leave(this.rooms[i]);
         this._connected = false;
         this.fire('s-io-disconnected');
       },
