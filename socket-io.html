@@ -114,12 +114,12 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
             window.onbeforeunload = this.beforeUnload.bind(this);
             this.init();
             if (this.autoConnect) {
-                if (debug) console.log("Automatic connection");
+                if (this.debug) console.log("Automatic connection");
                 this.connect();
             }
         },
         init: function() {
-            if (debug) {
+            if (this.debug) {
                 console.log("------------------------------------------");
                 console.log("START: Initializing socket.io client");
                 console.log("Variables");
@@ -142,7 +142,7 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
             manager.on('reconnect_failed', this.onReconnectFailed.bind(this));
             manager.on('reconnect_error', this.onError.bind(this));
 
-            if (debug) {
+            if (this.debug) {
                 console.log("END: Initializing socket.io client");
                 console.log("------------------------------------------");
             }
@@ -157,11 +157,11 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
          * @param {String} data data to send
          */
         emit: function(event, data) {
-            if (debug) console.log("sending '" + event + "' via polymer-socket-io: data", data);
+            if (this.debug) console.log("sending '" + event + "' via polymer-socket-io: data", data);
             try {
                 if (this.ws) this.ws.emit(event, data);
             } catch (error) {
-                if (debug) console.log("cannot send message: error:" + error);
+                if (this.debug) console.log("cannot send message: error:" + error);
             }
         },
         /**
@@ -173,11 +173,11 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
          * @param {String} room to send data
          */
         emitRoom: function(event, data, room) {
-            if (debug) console.log("sending '" + event + "' to " + room + " via polymer-socket-io: data", data);
+            if (this.debug) console.log("sending '" + event + "' to " + room + " via polymer-socket-io: data", data);
             try {
                 if (this.ws) this.ws.to(room).emit(event, data);
             } catch (error) {
-                if (debug) console.log("cannot send message: error:" + error);
+                if (this.debug) console.log("cannot send message: error:" + error);
             }
         },
         /**
@@ -200,7 +200,7 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
          * @method connect
          */
         connect: function() {
-            if (debug) console.log("Connecting... (disconnect + connect)");
+            if (this.debug) console.log("Connecting... (disconnect + connect)");
             this.disconnect();
             this.ws.connect();
         },
@@ -210,7 +210,7 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
          * @method disconnect
          */
         disconnect: function() {
-            if (debug) console.log("Disconnecting ...");
+            if (this.debug) console.log("Disconnecting ...");
             if (this.ws != undefined && !this._connected) {
                 try {
                     this.ws.disconnect();
@@ -224,11 +224,11 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
             this._connected = newValue;
 
             if (this._connected) {
-                if (debug) console.log("Connected attribute changed. Connecting...");
+                if (this.debug) console.log("Connected attribute changed. Connecting...");
                 this.connect();
             } else {
                 if (oldValue != undefined) {
-                    if (debug) console.log("Connected attribute changed. Disconnecting...");
+                    if (this.debug) console.log("Connected attribute changed. Disconnecting...");
                     this.disconnect();
                 }
             }
@@ -247,15 +247,15 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
             }
         },
         socketUrlChanged: function() {
-            if (debug) console.log("Socket URL changed");
+            if (this.debug) console.log("Socket URL changed");
             if (this._connected) this.connect();
         },
         namespaceChanged: function() {
-            if (debug) console.log("Namespace attribute changed");
+            if (this.debug) console.log("Namespace attribute changed");
             if (this._connected) this.connect();
         },
         listenToChanged: function(oldListenTo) {
-            if (debug) console.log("ListenTo attribute changed");
+            if (this.debug) console.log("ListenTo attribute changed");
             if (this.ws != undefined && this._connected) {
                 if (oldListenTo) {
                     for (var i = 0; i < oldListenTo.length; i++) {
@@ -307,7 +307,7 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
             //TODO: replace with <core-signals>
         },
         beforeUnload: function(event) {
-            if (debug) console.load("Before unload");
+            if (this.debug) console.load("Before unload");
             this.disconnect();
             this.manager.removeAllListeners('connect');
             this.manager.removeAllListeners('disconnect');
