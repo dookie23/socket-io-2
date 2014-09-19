@@ -1,31 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
 <script src="../socket.io-client/socket.io.js"></script>
 
-
-<!--
-Socket.io Element.
-
-##### Example
-
-    <socket-io></socket-io>
-    
-##### Other example (see chat-client demo)!
-
-    <socket-io socketUrl="http://localhost:8082" 
-        listenTo=["message","userChanged"] inMessage={{inMessage}} outMessage={{outMessage}} outEventName="message">
-    </socket-io>
-
-@element socket-io
-@blurb Web component for socket-io interactions
-@status alpha
-@homepage http://kaosat-dev.github.io/socket-io
-
-You can find a fleshed out example (small chat app) that needs to be run from a local server in this folder
-(demo-chat-client & server), see README for more information.
-
-TODO: should we expose some event so parsing the "inMessage" is optional (for more complex cases)?
--->
-<polymer-element name="socket-io" attributes="socketUrl namespace rooms autoConnect listenTo connected outEventName inMessage outMessage debug">
+<polymer-element name="socket-io" attributes="socketUrl namespace rooms autoConnect listenTo connected outEventName inMessage outMessage debug token">
     <script>
     Polymer("socket-io", {
         /**
@@ -100,12 +76,20 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
         listenTo: [],
         /**
          * debug` activates debug mode
-         * defaults to hostname
+         * defaults to false
          *
          * @attribute debug
          * @type bool
          */
         debug: false,
+        /**
+         * token` 
+         * defaults to undefined
+         *
+         * @attribute debug
+         * @type bool
+         */
+        token: undefined,
 
 
 
@@ -129,15 +113,18 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
             }
             if (window.io == undefined) throw new Error("Could not import socket.io library");
 
-            var manager = this.manager = io.Manager(this.socketUrl, {
-                'auto connect': false
-            });
+            var options = {
+              'auto connect': false            };
+
+            if (this.token != undefined) options['query'] = 'token=' + this.token;
+
+            var manager = this.manager = io.Manager(this.socketUrl, options);
             this.ws = manager.socket(this.namespace);
 
             manager.on('open', this.onConnect.bind(this));
             manager.on('close', this.onDisconnect.bind(this));
             manager.on('error', this.onError.bind(this));
-            manager.on('connect_failed', this.onError.bind(this));
+            manager.on('connect_error', this.onError.bind(this));
             manager.on('connect_timeout', this.onError.bind(this));
             manager.on('reconnect_failed', this.onReconnectFailed.bind(this));
             manager.on('reconnect_error', this.onError.bind(this));
@@ -234,6 +221,8 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
             }
         },
         outMessageChanged: function() {
+            console.log("Ha llegado un mensaje");
+            console.log(this.outMessage);
             if (this.outMessage) {
                 var fullMessage = this.outMessage;
                 var eventName = this.outEventName;
@@ -243,6 +232,7 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
                         fullMessage = fullMessage.data;
                     }
                 }
+                if ("room" in fullMessage) this.emitRoom(fullMessage.room, eventName, fullMessage);
                 this.emit(eventName, fullMessage);
             }
         },
@@ -296,6 +286,9 @@ TODO: should we expose some event so parsing the "inMessage" is optional (for mo
             console.log('Reconnect failed polymer-socket-io', error);
         },
         onMessageReceived: function(event, msg) {
+            console.log("Ha llegado un mensaje");
+            console.log(this.event);
+            console.log(msg);
             this.inMessage = {
                 event: event,
                 data: msg
